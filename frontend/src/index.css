@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* Tailwind v4 is CSS-first; this pulls in the Bauhaus tokens from the JS config. */
+@config "../tailwind.config.js";
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+        @apply bg-canvas text-ink font-sans font-medium;
+    }
+
+    /* Bauhaus focus: a hard offset ring, never a soft glow. */
+    :focus-visible {
+        outline: 4px solid #1040c0;
+        outline-offset: 2px;
+    }
+
+    ::selection {
+        background: #f0c020;
+        color: #121212;
+    }
+}
+
+@layer components {
+    /* The three repeated primitives. Everything else composes from these. */
+    .bauhaus-card {
+        @apply relative border-2 lg:border-4 border-ink bg-white rounded-none
+           shadow-[4px_4px_0px_0px_#121212] lg:shadow-[8px_8px_0px_0px_#121212];
+    }
+
+    .bauhaus-label {
+        @apply font-bold uppercase tracking-widest text-xs;
+    }
+
+    .bauhaus-display {
+        @apply font-black uppercase tracking-tighter leading-[0.9];
+    }
+}
+
+/* Motion is decoration. If it's unwelcome, remove it entirely. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
