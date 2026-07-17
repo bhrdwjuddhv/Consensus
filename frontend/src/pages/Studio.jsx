@@ -8,7 +8,7 @@ import SummaryStrip from "../components/SummaryStrip.jsx";
 import FinalAnswer from "../components/FinalAnswer.jsx";
 import ErrorState from "../components/ErrorState.jsx";
 import { MODELS, getModel } from "../lib/models.js";
-import { runConsensus } from "../lib/api.js";
+import { runConsensus, didAnswer } from "../lib/api.js";
 import { useRuns } from "../context/RunsContext.jsx";
 
 /**
@@ -95,8 +95,8 @@ export default function Studio() {
 
             clearTimers();
 
-            // Reconcile against the real payload: a model present in `scores` answered,
-            // a model absent from it did not.
+            // Reconcile against the real payload: a model that returned an answer
+            // answered. Keyed off `answers`, never `scores` — see didAnswer.
             setStages((current) =>
                 current.map((stage) => {
                     if (stage.key === "dispatch") return { ...stage, state: "done" };
@@ -104,7 +104,7 @@ export default function Studio() {
                     if (MODELS.some((m) => m.id === stage.key)) {
                         return {
                             ...stage,
-                            state: consensus.scores?.[stage.key] ? "done" : "failed",
+                            state: didAnswer(consensus, stage.key) ? "done" : "failed",
                         };
                     }
 
@@ -143,7 +143,7 @@ export default function Studio() {
         setStatus("idle");
     };
 
-    const answered = MODELS.filter((model) => result?.scores?.[model.id]).map(({ id }) => id);
+    const answered = MODELS.filter((model) => didAnswer(result, model.id)).map(({ id }) => id);
 
     return (
         <div className="mx-auto max-w-6xl px-4 py-10 lg:px-8 lg:py-16">
@@ -213,6 +213,8 @@ export default function Studio() {
                                 key={model.id}
                                 model={model}
                                 score={result.scores?.[model.id]}
+                                answer={result.answers?.[model.id]}
+                                answered={didAnswer(result, model.id)}
                                 index={index}
                             />
                         ))}

@@ -5,6 +5,7 @@ import ShapeDecor from "../components/ShapeDecor.jsx";
 import StatusPill from "../components/StatusPill.jsx";
 import { MODELS } from "../lib/models.js";
 import { CONTEXT_CHATS } from "../lib/history.js";
+import { didAnswer } from "../lib/api.js";
 import { useRuns } from "../context/RunsContext.jsx";
 
 const formatTime = (ms) =>
@@ -66,7 +67,7 @@ export default function History() {
 
             <ul className="space-y-6">
                 {runs.map(({ id, createdAt, result }) => {
-                    const answered = MODELS.filter((model) => result.scores?.[model.id]);
+                    const answered = MODELS.filter((model) => didAnswer(result, model.id));
 
                     return (
                         <li
@@ -85,7 +86,7 @@ export default function History() {
 
                             <div className="mt-5 flex flex-wrap items-center gap-3 border-t-2 border-ink/15 pt-4">
                                 {MODELS.map((model) => {
-                                    const ok = Boolean(result.scores?.[model.id]);
+                                    const ok = didAnswer(result, model.id);
 
                                     return (
                                         <span

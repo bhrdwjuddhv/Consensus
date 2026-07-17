@@ -28,8 +28,6 @@ const getResponsesFromAllAiModels = async (messages) => {
         throw new ApiError(502, "All AI providers failed to respond", { providers: failed });
     }
 
-    console.log(failed)
-
     return succeeded;
 };
 

@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { motion } from "motion/react";
-import { Check, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
 
 import ShapeDecor from "./ShapeDecor.jsx";
 
@@ -32,13 +33,19 @@ function ScoreBar({ label, value, color }) {
 }
 
 /**
- * One model's evaluation.
+ * One model's evaluation, plus its raw answer behind a toggle.
  *
- * `score` absent (the model never answered) renders the failed variant rather
- * than crashing. Missing strengths/weaknesses default to empty arrays.
+ * Failure is decided by whether the model ANSWERED, not by whether the evaluator
+ * scored it: `scores` is the judge's optional output, and it omitting a model is
+ * not evidence that the model failed. A model can legitimately answer and go
+ * unscored — that shows its answer with the bars omitted, not a failed card.
+ *
+ * Missing strengths/weaknesses default to empty arrays.
  */
-export default function ModelScoreCard({ model, score, index = 0 }) {
-    const failed = !score;
+export default function ModelScoreCard({ model, score, answer, answered, index = 0 }) {
+    const [showAnswer, setShowAnswer] = useState(false);
+
+    const failed = !answered;
 
     const strengths = score?.strengths ?? [];
     const weaknesses = score?.weaknesses ?? [];
@@ -73,7 +80,8 @@ export default function ModelScoreCard({ model, score, index = 0 }) {
                        bauhaus-display text-xl tabular-nums"
                         style={{ backgroundColor: model.color, color: "#121212" }}
                     >
-                        {score.overall}
+                        {/* Answered but unscored by the judge. */}
+                        {score ? score.overall : "—"}
                     </span>
                 )}
             </header>
@@ -85,12 +93,20 @@ export default function ModelScoreCard({ model, score, index = 0 }) {
                 </p>
             ) : (
                 <>
-                    <div className="mt-6 space-y-3">
-                        <ScoreBar label="Accuracy" value={score.accuracy} color={model.color} />
-                        <ScoreBar label="Reasoning" value={score.reasoning} color={model.color} />
-                        <ScoreBar label="Clarity" value={score.clarity} color={model.color} />
-                        <ScoreBar label="Overall" value={score.overall} color="#121212" />
-                    </div>
+                    {score ? (
+                        <div className="mt-6 space-y-3">
+                            <ScoreBar label="Accuracy" value={score.accuracy} color={model.color} />
+                            <ScoreBar label="Reasoning" value={score.reasoning} color={model.color} />
+                            <ScoreBar label="Clarity" value={score.clarity} color={model.color} />
+                            <ScoreBar label="Overall" value={score.overall} color="#121212" />
+                        </div>
+                    ) : (
+                        // Answered, but the judge left it out of `scores`. Say so plainly
+                        // rather than implying the model failed.
+                        <p className="bauhaus-label mt-6 text-ink/50">
+                            Answered — not scored by the evaluator
+                        </p>
+                    )}
 
                     <div className="mt-6 grow space-y-4 border-t-2 border-ink/15 pt-4">
                         {strengths.length > 0 && (
@@ -127,6 +143,42 @@ export default function ModelScoreCard({ model, score, index = 0 }) {
                                     ))}
                                 </ul>
                             </div>
+                        )}
+                    </div>
+
+                    {/* The raw answer — supporting evidence, collapsed by default so the
+              synthesized answer above stays the headline. */}
+                    <div className="-mx-5 -mb-5 mt-6 border-t-4 border-ink">
+                        {answer ? (
+                            <>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAnswer((v) => !v)}
+                                    aria-expanded={showAnswer}
+                                    className="flex w-full items-center justify-between gap-2 px-5 py-3
+                             bauhaus-label transition-colors duration-200 ease-out
+                             hover:bg-muted"
+                                >
+                                    {showAnswer ? "Hide response" : "Show response"}
+                                    <ChevronDown
+                                        size={14}
+                                        strokeWidth={3}
+                                        className={`transition-transform duration-200 ease-out ${
+                                            showAnswer ? "rotate-180" : ""
+                                        }`}
+                                    />
+                                </button>
+
+                                {showAnswer && (
+                                    <div className="border-t-4 border-ink bg-cream px-5 py-4">
+                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                                            {answer}
+                                        </p>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <p className="bauhaus-label px-5 py-3 text-ink/40">No response</p>
                         )}
                     </div>
                 </>
