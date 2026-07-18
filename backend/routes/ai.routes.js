@@ -17,8 +17,9 @@ const requireUser = (req, _res, next) => {
     return next();
 };
 
+
 router
     .route("/get-and-evaluate-response")
-    .post(clerkMiddleware(), requireUser, aiRateLimiter, getResponse);
+    .post(aiRateLimiter, clerkMiddleware(), requireUser, getResponse);
 
 export default router;
