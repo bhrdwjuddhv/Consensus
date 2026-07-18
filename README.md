@@ -1,4 +1,4 @@
-# AnswerEngine
+#Consensus
 
 A self-consistency answer engine. You ask one question, three different AI models answer it
 independently, and a fourth model judges those answers and merges the strongest parts into a
