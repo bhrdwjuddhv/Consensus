@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const port = process.env.PORT ?? 8000;
+const port = process.env.PORT ?? 3000;
 const corsOrigin = process.env.CORS_ORIGIN
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
 const openAiApiKey = process.env.OPENAI_API_KEY;
